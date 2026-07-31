@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>runbox — online compiler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <div class="app">
+
+        <header class="titlebar">
+            <div class="dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-amber"></span>
+                <span class="dot dot-green"></span>
+            </div>
+            <div class="titlebar-name">
+                <span class="brand">run<span class="brand-accent">box</span></span>
+                <span class="filename">/ main<span id="file-ext">.cpp</span></span>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>ready</span>
+            </div>
+        </header>
+
+        <main class="workspace">
+
+            <section class="editor-pane">
+                <div class="pane-header">
+                    <div class="toolbar-left">
+                        <label for="language" class="visually-hidden">Language</label>
+                        <div class="select-wrap">
+                            <select id="language">
+                                <option value="cpp" data-ext=".cpp">C++</option>
+                                <option value="python" data-ext=".py">Python</option>
+                                <option value="java" data-ext=".java">Java</option>
+                                <option value="c" data-ext=".c">C</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="run-btn" onclick="runCode()">
+                        <svg class="run-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                            <path d="M3 2.5v11l10-5.5-10-5.5z" fill="currentColor"/>
+                        </svg>
+                        RUN
+                    </button>
+                </div>
+
+                <div class="editor-body">
+                    <div class="gutter" id="gutter" aria-hidden="true"></div>
+                    <textarea id="code" spellcheck="false" placeholder="// start typing your code here..."></textarea>
+                </div>
+
+                <div class="pane-footer">
+                    <span>UTF-8</span>
+                    <span class="divider">·</span>
+                    <span>LF</span>
+                    <span class="divider">·</span>
+                    <span id="pos">Ln 1, Col 1</span>
+                </div>
+            </section>
+
+            <section class="output-pane">
+                <div class="pane-header">
+                    <span class="pane-title">
+                        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+                            <path d="M1 3h14v10H1V3zm1.5 1.5v7h11v-7h-11z" fill="currentColor" opacity="0.6"/>
+                            <path d="M3 6l2 2-2 2M6 10h3" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        console
+                    </span>
+                    <button class="clear-btn" onclick="clearConsole()">clear</button>
+                </div>
+                <pre class="console" id="console"><span class="console-line muted">$ waiting for input…</span></pre>
+            </section>
+
+        </main>
+
+        <footer class="statusbar">
+            <span>runbox v1.0</span>
+            <span class="divider">·</span>
+            <span>no active session</span>
+        </footer>
+
+    </div>
+
+</body>
+</html>
