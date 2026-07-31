@@ -38,7 +38,7 @@ async function runCode() {
     consoleEl.innerHTML = `<span class="console-line muted">$ compiling ${language} …</span>`;
 
     try {
-        const response = await fetch("http://localhost:5000/api/execute", {
+        const response = await fetch("https://codify-rt7b.onrender.com/api/execute", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -67,7 +67,7 @@ async function runCode() {
         console.error(err);
         consoleEl.innerHTML =
             `<span class="console-line muted">$ compiling ${language} …</span>\n` +
-            `<span class="console-line error">$ could not reach the server — is it running on localhost:5000?</span>`;
+            `<span class="console-line error">$ could not reach the server — is it running on render?</span>`;
     }
 }
 
