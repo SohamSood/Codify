@@ -20,6 +20,12 @@ router.post("/execute", async (req, res) => {
     try {
         const apiKey = process.env.ONLINE_COMPILER_API_KEY;
 
+        if (!apiKey) {
+            return res.status(503).json({
+                error: "Online compiler API key is not configured"
+            });
+        }
+
         const { code, language } = req.body;
 
         const compiler = compilerMap[language];
