@@ -1,5 +1,8 @@
-// Front-end only interactions — no real compilation happens here.
-// Wire this up to your backend/API to actually execute code.
+// Front-end interactions for runbox. Execution is delegated to the
+// backend API (see API_BASE_URL below).
+
+const API_BASE_URL = "https://codify-rt7b.onrender.com";
+// Local development: const API_BASE_URL = "http://localhost:5000";
 
 const codeArea = document.getElementById("code");
 const gutter = document.getElementById("gutter");
@@ -37,8 +40,9 @@ async function runCode() {
 
     consoleEl.innerHTML = `<span class="console-line muted">$ compiling ${language} …</span>`;
 
+    let response;
     try {
-        const response = await fetch("https://codify-rt7b.onrender.com/api/execute", {
+        response = await fetch(`${API_BASE_URL}/api/execute`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -48,27 +52,45 @@ async function runCode() {
                 language
             })
         });
-
-        const data = await response.json();
-        console.log(data);
-
-        const output = data.output ?? data.stdout ?? JSON.stringify(data, null, 2);
-        const error = data.error ?? data.stderr;
-
-        let html = `<span class="console-line muted">$ compiling ${language} …</span>\n`;
-        if (output) {
-            html += `<span class="console-line">${escapeHtml(output)}</span>`;
-        }
-        if (error) {
-            html += `\n<span class="console-line error">${escapeHtml(error)}</span>`;
-        }
-        consoleEl.innerHTML = html;
     } catch (err) {
         console.error(err);
         consoleEl.innerHTML =
             `<span class="console-line muted">$ compiling ${language} …</span>\n` +
             `<span class="console-line error">$ could not reach the server — is it running on render?</span>`;
+        return;
     }
+
+    // Proxies can answer with HTML (e.g. Render waking up), so parsing may fail.
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        data = null;
+    }
+
+    if (!data || typeof data !== "object") {
+        const hint = response.status === 503
+            ? "$ server is waking up — try again in a few seconds"
+            : `$ unexpected response from server (HTTP ${response.status})`;
+        consoleEl.innerHTML =
+            `<span class="console-line muted">$ compiling ${language} …</span>\n` +
+            `<span class="console-line error">${hint}</span>`;
+        return;
+    }
+
+    console.log(data);
+
+    const output = data.output ?? data.stdout ?? JSON.stringify(data, null, 2);
+    const error = data.error ?? data.stderr;
+
+    let html = `<span class="console-line muted">$ compiling ${language} …</span>\n`;
+    if (output) {
+        html += `<span class="console-line">${escapeHtml(output)}</span>`;
+    }
+    if (error) {
+        html += `\n<span class="console-line error">${escapeHtml(error)}</span>`;
+    }
+    consoleEl.innerHTML = html;
 }
 
 function escapeHtml(str) {

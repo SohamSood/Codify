@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
 
-const compilerMap = {
-    cpp: "g++-15",
-    c: "gcc-15",
-    python: "python-3.14",
-    java: "openjdk-25",
-    javascript: "typescript-deno"
-};
+const { execute } = require("../controllers/executeController");
+const { createRateLimiter, envInt } = require("../middleware/rateLimiter");
+
+// Each execution bills against the upstream compiler API key, so protect
+// only the expensive endpoint (health checks stay unlimited).
+const executeLimiter = createRateLimiter({
+    windowMs: envInt("RATE_LIMIT_WINDOW_MS", 60 * 1000),
+    max: envInt("RATE_LIMIT_MAX", 60)
+});
 
 router.get("/", (req, res) => {
     res.json({
@@ -16,51 +17,6 @@ router.get("/", (req, res) => {
     });
 });
 
-router.post("/execute", async (req, res) => {
-    try {
-        const apiKey = process.env.ONLINE_COMPILER_API_KEY;
-
-        if (!apiKey) {
-            return res.status(503).json({
-                error: "Online compiler API key is not configured"
-            });
-        }
-
-        const { code, language } = req.body;
-
-        const compiler = compilerMap[language];
-
-        if (!compiler) {
-            return res.status(400).json({
-                error: "Unsupported language"
-            });
-        }
-
-        const response = await axios.post(
-            "https://api.onlinecompiler.io/api/run-code-sync/",
-            {
-                compiler,
-                code,
-                input: ""
-            },
-            {
-                headers: {
-                    Authorization: apiKey
-                }
-            }
-        );
-
-        console.log(response.data);
-
-        res.json(response.data);
-
-    } catch (err) {
-        console.error(err.response?.data || err.message);
-
-        res.status(500).json({
-            error: err.response?.data || err.message
-        });
-    }
-});
+router.post("/execute", executeLimiter, execute);
 
 module.exports = router;
