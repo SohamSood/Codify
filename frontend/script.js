@@ -11,6 +11,37 @@ const fileExt = document.getElementById("file-ext");
 const posLabel = document.getElementById("pos");
 const consoleEl = document.getElementById("console");
 
+const BOILERPLATES = {
+    cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, World!" << endl;
+    return 0;
+}
+`,
+    c: `#include <stdio.h>
+
+int main() {
+    printf("Hello, World!\\n");
+    return 0;
+}
+`,
+    python: `print("Hello, World!")
+`,
+    java: `public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+`,
+    javascript: `console.log("Hello, World!");
+`
+};
+
+let currentLanguage = langSelect.value;
+const codeSnippets = { ...BOILERPLATES };
+
 function updateGutter() {
     const lines = codeArea.value.split("\n").length || 1;
     gutter.innerHTML = Array.from({ length: lines }, (_, i) => `<span>${i + 1}</span>`).join("");
@@ -27,6 +58,15 @@ function updatePosition() {
 function updateFileExtension() {
     const opt = langSelect.options[langSelect.selectedIndex];
     fileExt.textContent = opt.dataset.ext || "";
+}
+
+function handleLanguageChange() {
+    codeSnippets[currentLanguage] = codeArea.value;
+    currentLanguage = langSelect.value;
+    codeArea.value = codeSnippets[currentLanguage] ?? BOILERPLATES[currentLanguage] ?? "";
+    updateFileExtension();
+    updateGutter();
+    updatePosition();
 }
 
 async function runCode() {
@@ -104,6 +144,7 @@ function clearConsole() {
 }
 
 codeArea.addEventListener("input", () => {
+    codeSnippets[currentLanguage] = codeArea.value;
     updateGutter();
     updatePosition();
 });
@@ -164,9 +205,13 @@ function enableAutoIndent() {
 
 codeArea.addEventListener("keyup", updatePosition);
 codeArea.addEventListener("click", updatePosition);
-langSelect.addEventListener("change", updateFileExtension);
+langSelect.addEventListener("change", handleLanguageChange);
 
-enableTabIndent(); 
+enableTabIndent();
+if (!codeArea.value.trim()) {
+    codeArea.value = BOILERPLATES[currentLanguage] || "";
+}
+codeSnippets[currentLanguage] = codeArea.value;
 updateGutter();
 updatePosition();
 updateFileExtension();

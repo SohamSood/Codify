@@ -41,6 +41,7 @@
                                 <option value="python" data-ext=".py">Python</option>
                                 <option value="java" data-ext=".java">Java</option>
                                 <option value="c" data-ext=".c">C</option>
+                                <option value="javascript" data-ext=".js">JavaScript</option>
                             </select>
                         </div>
                     </div>
@@ -54,7 +55,14 @@
 
                 <div class="editor-body">
                     <div class="gutter" id="gutter" aria-hidden="true"></div>
-                    <textarea id="code" spellcheck="false" placeholder="// start typing your code here..."></textarea>
+                    <textarea id="code" spellcheck="false" placeholder="// start typing your code here...">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    cout &lt;&lt; "Hello, World!" &lt;&lt; endl;
+    return 0;
+}
+</textarea>
                 </div>
 
                 <div class="pane-footer">
